@@ -1,0 +1,36 @@
+language: java
+jdk:
+- openjdk7
+sudo: required
+before_script:
+- cd $HOME
+- sudo apt-get install -y lzop git-core gnupg flex bison gperf build-essential zip
+  curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev
+  libx11-dev lib32z-dev ccache libgl1-mesa-dev libxml2-utils xsltproc unzip maven
+  schedtool &> /dev/null
+- wget https://github.com/TwrpBuilder/twrp-5.1.1-source/releases/download/initial/twrp-5.1.1.tar.xz -O $HOME/twrp.tar.xz
+- tar -xvf twrp.tar.xz &> log
+script:
+- cd $HOME/twrp
+- git clone https://github.com/TwrpBuilder/android_device_samsung_zenlteatt.git device/samsung/zenlteatt
+  &> /dev/null
+- rm -rf bootable/recovery
+- git clone https://github.com/omnirom/android_bootable_recovery.git bootable/recovery
+  &> /dev/null
+- source build/envsetup.sh ; lunch omni_zenlteatt-eng
+- make -j4 bootimage
+- make -j4 recoveryimage &> log
+- mkazip_zenlteatt
+- curl --upload-file "./log" "https://transfer.sh/log"
+- cd out/target/product/zenlteatt/
+- md5sum recovery.img > md5
+- cp recovery.img "$(date +%Y%m%d)-$(cat md5)"
+- curl --upload-file "./$(date +%Y%m%d)-$(cat md5)" "https://transfer.sh/$(date +%Y%m%d)-$(cat
+  md5)"
+- tar -H ustar -c "$(date +%Y%m%d)-$(cat md5)" > "$(date +%Y%m%d)-$(cat md5).tar"
+- echo "Made Tar"
+- curl --upload-file "./$(date +%Y%m%d)-$(cat md5).tar" "https://transfer.sh/$(date
+  +%Y%m%d)-$(cat md5).tar"
+- echo "####Made Zip#####"
+- curl --upload-file "./twrp-$(date +%Y%m%d)-3.0.3-UNOFFICIAL-zenlteatt.zip" "https://transfer.sh/twrp-$(date
+  +%Y%m%d)-3.0.3-UNOFFICIAL-zenlteatt.zip"

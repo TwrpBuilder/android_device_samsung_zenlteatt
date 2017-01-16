@@ -1,0 +1,3 @@
+post-build=samsung/cm_delos3geur/delos3geur:4.4.4/KTU84Q/1cff0e68fc:userdebug/test-keys
+post-timestamp=1461437545
+pre-device=delos3geur
